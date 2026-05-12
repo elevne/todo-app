@@ -9,6 +9,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Section as SectionType, Task } from "../types";
 import { TaskItem } from "./TaskItem";
 import { useTodoStore } from "../store/todoStore";
+import { AutoGrowTextarea } from "./AutoGrowTextarea";
 
 interface Props {
   section: SectionType | null; // null = 섹션 미지정 영역
@@ -139,20 +140,23 @@ export function Section({ section, categoryId, tasks }: Props) {
         </SortableContext>
 
         {adding ? (
-          <input
+          <AutoGrowTextarea
             autoFocus
             value={taskDraft}
             onChange={(e) => setTaskDraft(e.target.value)}
             onBlur={commitTask}
             onKeyDown={(e) => {
-              if (e.key === "Enter") commitTask();
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                commitTask();
+              }
               if (e.key === "Escape") {
                 setTaskDraft("");
                 setAdding(false);
               }
             }}
-            placeholder="할 일 입력 후 Enter"
-            className="w-full px-3 py-2 rounded-lg text-sm outline-none
+            placeholder="할 일 입력 후 Enter (Shift+Enter로 줄바꿈)"
+            className="w-full px-3 py-2 rounded-lg text-sm outline-none leading-relaxed
                        bg-white dark:bg-zinc-900
                        border border-accent focus:ring-2 focus:ring-accent/40"
           />

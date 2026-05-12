@@ -3,6 +3,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Task } from "../types";
 import { useTodoStore } from "../store/todoStore";
+import { AutoGrowTextarea } from "./AutoGrowTextarea";
 
 export function TaskItem({ task }: { task: Task }) {
   const toggle = useTodoStore((s) => s.toggleTask);
@@ -31,14 +32,14 @@ export function TaskItem({ task }: { task: Task }) {
     <div
       ref={setNodeRef}
       style={style}
-      className="group flex items-center gap-2 px-3 py-2 rounded-lg
+      className="group flex items-start gap-2 px-3 py-2 rounded-lg
                  bg-white hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800
                  border border-zinc-200 dark:border-zinc-800"
     >
       <span
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing text-zinc-400 select-none px-1"
+        className="cursor-grab active:cursor-grabbing text-zinc-400 select-none px-1 pt-0.5"
         title="드래그하여 이동"
       >
         ⋮⋮
@@ -48,28 +49,31 @@ export function TaskItem({ task }: { task: Task }) {
         type="checkbox"
         checked={task.completed}
         onChange={() => toggle(task.id)}
-        className="w-4 h-4 accent-accent cursor-pointer"
+        className="w-4 h-4 accent-accent cursor-pointer mt-1"
       />
 
       {editing ? (
-        <input
+        <AutoGrowTextarea
           autoFocus
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={commit}
           onKeyDown={(e) => {
-            if (e.key === "Enter") commit();
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              commit();
+            }
             if (e.key === "Escape") {
               setDraft(task.title);
               setEditing(false);
             }
           }}
-          className="flex-1 bg-transparent outline-none text-sm"
+          className="flex-1 bg-transparent outline-none text-sm leading-relaxed"
         />
       ) : (
         <span
           onDoubleClick={() => setEditing(true)}
-          className={`flex-1 text-sm cursor-text select-none ${
+          className={`flex-1 text-sm cursor-text select-none whitespace-pre-wrap break-words leading-relaxed ${
             task.completed
               ? "line-through text-zinc-400 dark:text-zinc-500"
               : ""
@@ -81,7 +85,7 @@ export function TaskItem({ task }: { task: Task }) {
 
       <button
         onClick={() => remove(task.id)}
-        className="opacity-0 group-hover:opacity-100 text-xs text-zinc-400 hover:text-red-500 px-1.5"
+        className="opacity-0 group-hover:opacity-100 text-xs text-zinc-400 hover:text-red-500 px-1.5 mt-0.5"
         title="삭제"
       >
         ✕
