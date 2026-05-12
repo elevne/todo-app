@@ -44,21 +44,27 @@ export const useTodoStore = create<State>((set, get) => ({
   loaded: false,
 
   init: async () => {
-    const categories = await db.listCategories();
-    let activeId = categories[0]?.id ?? null;
-    let sections: Section[] = [];
-    let tasks: Task[] = [];
-    if (activeId) {
-      sections = await db.listSections(activeId);
-      tasks = await db.listTasks(activeId);
+    try {
+      const categories = await db.listCategories();
+      let activeId = categories[0]?.id ?? null;
+      let sections: Section[] = [];
+      let tasks: Task[] = [];
+      if (activeId) {
+        sections = await db.listSections(activeId);
+        tasks = await db.listTasks(activeId);
+      }
+      set({
+        categories,
+        sections,
+        tasks,
+        activeCategoryId: activeId,
+        loaded: true,
+      });
+    } catch (e) {
+      // Tauri 런타임 부재 (브라우저 미리보기) 등 — UI는 그대로 띄움
+      console.warn("DB unavailable, running without persistence:", e);
+      set({ loaded: true });
     }
-    set({
-      categories,
-      sections,
-      tasks,
-      activeCategoryId: activeId,
-      loaded: true,
-    });
   },
 
   setActiveCategory: async (id) => {
