@@ -83,6 +83,16 @@ export function TaskItem({ task }: { task: Task }) {
         </span>
       )}
 
+      {!editing && (
+        <button
+          onClick={() => setEditing(true)}
+          className="opacity-0 group-hover:opacity-100 text-sm text-zinc-400 hover:text-accent px-1.5 mt-0.5"
+          title="수정 (또는 더블클릭)"
+        >
+          ✎
+        </button>
+      )}
+
       <button
         onClick={() => remove(task.id)}
         className="opacity-0 group-hover:opacity-100 text-xs text-zinc-400 hover:text-red-500 px-1.5 mt-0.5"

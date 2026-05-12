@@ -16,6 +16,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { Category } from "../types";
 import { useTodoStore } from "../store/todoStore";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 export function TabBar() {
   const categories = useTodoStore((s) => s.categories);
@@ -75,6 +76,7 @@ function Tab({
   const deleteCategory = useTodoStore((s) => s.deleteCategory);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(category.name);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: category.id });
@@ -103,7 +105,7 @@ function Tab({
       {...listeners}
       onDoubleClick={() => setEditing(true)}
       onClick={onClick}
-      className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm cursor-pointer select-none
+      className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm cursor-pointer select-none shrink-0
         ${
           active
             ? "bg-accent text-white"
@@ -134,9 +136,7 @@ function Tab({
       <button
         onClick={(e) => {
           e.stopPropagation();
-          if (confirm(`"${category.name}" 카테고리를 삭제할까요?`)) {
-            deleteCategory(category.id);
-          }
+          setConfirmOpen(true);
         }}
         onPointerDown={(e) => e.stopPropagation()}
         className="opacity-0 group-hover:opacity-100 hover:text-red-300 text-xs px-1"
@@ -144,6 +144,18 @@ function Tab({
       >
         ✕
       </button>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="카테고리 삭제"
+        message={`"${category.name}" 카테고리를 삭제할까요?\n포함된 모든 섹션과 할 일도 함께 삭제됩니다.`}
+        confirmLabel="삭제"
+        variant="danger"
+        onConfirm={() => {
+          setConfirmOpen(false);
+          deleteCategory(category.id);
+        }}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }
@@ -156,7 +168,7 @@ function AddTabButton({ onAdd }: { onAdd: (name: string) => void }) {
     return (
       <button
         onClick={() => setEditing(true)}
-        className="ml-2 px-2.5 py-1.5 rounded-lg text-sm
+        className="ml-2 shrink-0 px-2.5 py-1.5 rounded-lg text-sm
                    bg-zinc-100 hover:bg-zinc-200
                    dark:bg-zinc-800 dark:hover:bg-zinc-700"
         title="카테고리 추가"
@@ -187,7 +199,7 @@ function AddTabButton({ onAdd }: { onAdd: (name: string) => void }) {
         }
       }}
       placeholder="카테고리 이름"
-      className="ml-2 px-2 py-1.5 rounded-lg text-sm w-32 outline-none
+      className="ml-2 shrink-0 px-2 py-1.5 rounded-lg text-sm w-32 outline-none
                  bg-zinc-100 dark:bg-zinc-800 focus:ring-2 focus:ring-accent"
     />
   );
